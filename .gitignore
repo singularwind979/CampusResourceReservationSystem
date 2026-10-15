@@ -1,0 +1,21 @@
+# Compiled files
+target/
+*.class
+
+# IDEA
+.idea/
+*.iml
+*.ipr
+*.iws
+
+# Eclipse
+.classpath
+.project
+.settings/
+
+# Data files
+data/
+
+# System files
+.DS_Store
+Thumbs.db
