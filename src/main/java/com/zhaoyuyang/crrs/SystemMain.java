@@ -1,17 +1,20 @@
 package com.zhaoyuyang.crrs;
 
+import com.zhaoyuyang.crrs.entity.User;
+import com.zhaoyuyang.crrs.uitl.FileUtil;
+
 import java.util.*;
 
 public class SystemMain {
     // system info
     public static final String SYSTEM_NAME = "Campus Resource Reservation System";
 
-    private final List<User> userAccounts = new ArrayList<>();
+    private List<User> users = FileUtil.readUsers();
 
     private static final Scanner scanner = new Scanner(System.in);
 
-    private static boolean isEmpty(String input) {
-        return input == null || input.isEmpty();
+    private static boolean isNotEmpty(String input) {
+        return input != null && !input.isEmpty();
     }
 
     private static boolean isRightLength(String input, int minLength, int maxLength) {
@@ -25,11 +28,11 @@ public class SystemMain {
     }
 
     private static boolean isValidPassword(String password) {
-        return !isEmpty(password) && isRightLength(password, 6, 20);
+        return isNotEmpty(password) && isRightLength(password, 6, 20);
     }
 
     private static boolean isValidUsername(String username) {
-        return !isEmpty(username) && isRightLength(username, 4, 12);
+        return isNotEmpty(username) && isRightLength(username, 4, 12);
     }
 
     private static boolean passwordMatchesUsername(List<User> userAccounts, String username, String password) {
@@ -47,7 +50,7 @@ public class SystemMain {
     private String loginUsername() {
         while (true) {
             String username = prompt("Username(4-12 characters): ");
-            if (isValidUsername(username) && isExist(userAccounts, username)) {
+            if (isValidUsername(username) && isExist(users, username)) {
                 return username;
             }
             System.out.println("Username not valid or not exist.");
@@ -64,20 +67,12 @@ public class SystemMain {
         }
     }
 
-    private void printUserInfo(String username) {
-        userAccounts.stream()
-                .filter(user -> user.getUsername().equals(username))
-                .findFirst()
-                .ifPresent(user -> System.out.println("User info: " + user));
-    }
-
      private void login() {
          for (int i = 0; i < 3; i++) {
              String username = loginUsername();
              String password = loginPassword();
-             if (passwordMatchesUsername(userAccounts, username, password)) {
-                 System.out.println("Login success.");
-                 printUserInfo(username);
+             if (passwordMatchesUsername(users, username, password)) {
+                 System.out.println("Login success. Welcome " + username + "!");
                  return;
              }
              System.out.println("Password not match username.");
@@ -85,10 +80,10 @@ public class SystemMain {
          System.out.println("Login failed.");
      }
 
-     private String registerUsername() {
+    private String registerUsername() {
         while (true) {
             String username = prompt("Username(4-12 characters): ");
-            if (isValidUsername(username) && !isExist(userAccounts, username)) {
+            if (isValidUsername(username) && !isExist(users, username)) {
                 return username;
             }
             System.out.println("Username not valid or already exist.");
@@ -108,9 +103,10 @@ public class SystemMain {
      private void register() {
         String username = registerUsername();
         String password = registerPassword();
-        userAccounts.add(new User(username, password, "student"));
+        User newUser = new User(username, password, "student");
+        users.add(newUser);
+        FileUtil.writeUser(newUser);
         System.out.println("Register success.");
-        printUserInfo(username);
      }
 
     public static void main(String[] args) {
@@ -118,10 +114,11 @@ public class SystemMain {
         System.out.println("Menu:");
 
         SystemMain menu = new SystemMain();
+        menu.users = FileUtil.readUsers();
         while(true) {
             String choice = prompt("0. Exit\n1. Login\n2. Register\n");
             switch (choice) {
-                case "0": System.exit(0); break;
+                case "0": FileUtil.writeUsers(menu.users); System.exit(0); break;
                 case "1": menu.login(); break;
                 case "2": menu.register(); break;
                 default: System.out.println("Invalid choice.");

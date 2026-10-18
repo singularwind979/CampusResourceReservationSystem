@@ -1,4 +1,4 @@
-package com.zhaoyuyang.crrs;
+package com.zhaoyuyang.crrs.entity;
 
 import java.time.LocalDateTime;
 
@@ -6,7 +6,7 @@ public class User {
     private String username;
     private String password;
     private String role;        // admin or student
-    private final LocalDateTime registerTime = LocalDateTime.now();
+    private LocalDateTime registerTime;
 
     public User() {
     }
@@ -15,6 +15,14 @@ public class User {
         this.username = username;
         this.password = password;
         this.role = role;
+        this.registerTime = LocalDateTime.now();
+    }
+
+    public User(String username, String password, String role, LocalDateTime registerTime) {
+        this.username = username;
+        this.password = password;
+        this.role = role;
+        this.registerTime = registerTime;
     }
 
     public String getUsername() {
@@ -43,6 +51,10 @@ public class User {
 
     public LocalDateTime getRegisterTime() {
         return registerTime;
+    }
+
+    public void setRegisterTime(LocalDateTime registerTime) {
+        this.registerTime = registerTime;
     }
 
     @Override
