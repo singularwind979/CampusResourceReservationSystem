@@ -1,14 +1,12 @@
 package com.zhaoyuyang.crrs;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Scanner;
+import java.util.*;
 
 public class SystemMain {
     // system info
     public static final String SYSTEM_NAME = "Campus Resource Reservation System";
 
-    private final HashMap<String, String> userAccounts = new HashMap<>();
+    private final List<User> userAccounts = new ArrayList<>();
 
     private static final Scanner scanner = new Scanner(System.in);
 
@@ -20,8 +18,10 @@ public class SystemMain {
         return input.length() >= minLength && input.length() <= maxLength;
     }
 
-    private static boolean isExist(Collection<String> collection, String input) {
-        return collection.contains(input);
+    private static boolean isExist(List<User> userAccounts, String input) {
+        return userAccounts.stream().anyMatch(
+                user -> user.getUsername().equals(input)
+        );
     }
 
     private static boolean isValidPassword(String password) {
@@ -32,8 +32,11 @@ public class SystemMain {
         return !isEmpty(username) && isRightLength(username, 4, 12);
     }
 
-    private static boolean isRightAccount(HashMap<String, String> userAccounts, String username, String password) {
-        return userAccounts.get(username).equals(password);
+    private static boolean passwordMatchesUsername(List<User> userAccounts, String username, String password) {
+        return userAccounts.stream().anyMatch(
+                user -> user.getUsername().equals(username)
+                            && user.getPassword().equals(password)
+        );
     }
 
     private static String prompt(String prompt) {
@@ -44,7 +47,7 @@ public class SystemMain {
     private String loginUsername() {
         while (true) {
             String username = prompt("Username(4-12 characters): ");
-            if (isValidUsername(username) && isExist(userAccounts.keySet(), username)) {
+            if (isValidUsername(username) && isExist(userAccounts, username)) {
                 return username;
             }
             System.out.println("Username not valid or not exist.");
@@ -61,23 +64,31 @@ public class SystemMain {
         }
     }
 
+    private void printUserInfo(String username) {
+        userAccounts.stream()
+                .filter(user -> user.getUsername().equals(username))
+                .findFirst()
+                .ifPresent(user -> System.out.println("User info: " + user));
+    }
+
      private void login() {
          for (int i = 0; i < 3; i++) {
              String username = loginUsername();
              String password = loginPassword();
-             if (isRightAccount(userAccounts, username, password)) {
+             if (passwordMatchesUsername(userAccounts, username, password)) {
                  System.out.println("Login success.");
+                 printUserInfo(username);
                  return;
              }
              System.out.println("Password not match username.");
-             }
+         }
          System.out.println("Login failed.");
      }
 
      private String registerUsername() {
         while (true) {
             String username = prompt("Username(4-12 characters): ");
-            if (isValidUsername(username) && !isExist(userAccounts.keySet(), username)) {
+            if (isValidUsername(username) && !isExist(userAccounts, username)) {
                 return username;
             }
             System.out.println("Username not valid or already exist.");
@@ -97,9 +108,9 @@ public class SystemMain {
      private void register() {
         String username = registerUsername();
         String password = registerPassword();
-
-        userAccounts.put(username, password);
+        userAccounts.add(new User(username, password, "student"));
         System.out.println("Register success.");
+        printUserInfo(username);
      }
 
     public static void main(String[] args) {
@@ -117,5 +128,4 @@ public class SystemMain {
             }
         }
     }
-
 }
